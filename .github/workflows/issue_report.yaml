@@ -1,0 +1,36 @@
+name: Calc Result to Issue
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: # 수동 실행 버튼 활성화
+
+jobs:
+  run-and-report:
+    runs-on: ubuntu-latest
+    # 이슈 작성을 위해 쓰기 권한이 필요합니다
+    permissions:
+      issues: write
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Python 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 계산 실행 및 결과 저장
+        id: calc_step
+        run: |
+          # 파이썬 실행 결과를 output.md 파일에 저장
+          python calc.py > output.md
+          # 저장된 내용을 확인
+          cat output.md
+
+      - name: 결과를 이슈로 등록
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "🚀 사칙연산 자동 실행 결과"
+          content-filepath: ./output.md
